@@ -10,13 +10,8 @@ find . -type f -iname '*.pdf' -exec bash -c '
 	basename=$(basename "$0" .pdf)
 	target_file="$TARGET_DIR/$basename.pdf"
 	if [ ! -f $target_file ]; then
-		echo "Processing $basename.pdf"
-
-		# save to intermediate file system so that failed jobs
-		# wont pollute the output
-		ocrmypdf "$basename.pdf" "/var/run/$basename.ocr.pdf"
-		mv "/var/run/$basename.ocr.pdf" "$target_file"
-
+		echo "Processing $basename.pdf to $target_file"
+		pkgx ocrmypdf "$basename.pdf" "$target_file"
 		echo "Processed $basename.pdf"
 	fi
 
