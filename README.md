@@ -7,8 +7,8 @@ A worker container that scans all the files in `$SOURCE_DIR` and moves them to
 
 ## Environment variables
 
-- `SOURCE_DIR`: `/var/lib/non-ocr-pdf`
-- `TARGET_DIR`: `/var/lib/ocr-pdf`
+- `SOURCE_DIR`: `/var/lib/source`
+- `TARGET_DIR`: `/var/lib/target`
 
 ## License
 
