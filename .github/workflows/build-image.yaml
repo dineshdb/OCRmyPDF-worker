@@ -13,7 +13,7 @@ jobs:
   image:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
       packages: write
@@ -30,6 +30,19 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get Next Version
+        id: semver
+        uses: ietf-tools/semver-action@v1
+        with:
+          token: ${{ github.token }}
+          branch: main
+      - name: Set tag
+        env:
+          CI_COMMIT_AUTHOR: Continuous Integration
+        run: |
+          git config --global user.email "dineshdb@users.noreply.github.com"
+          git tag "${{ steps.semver.outputs.next }}"
+          git push --tags
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
