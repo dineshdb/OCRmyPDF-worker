@@ -11,7 +11,7 @@ echo "Watching $SOURCE_DIR for new PDF files..."
 find . -type f -iname '*.pdf' -exec sh -c '
 	basename=$(basename "$0" .pdf)
 	target_file="$TARGET_DIR/$basename.pdf"
-	echo "Found $target_file"
+	echo "Found $basename.pdf"
 	if [ ! -f $target_file ]; then
 		echo "Processing $basename.pdf to $target_file"
 		ocrmypdf "$basename.pdf" "$target_file"
