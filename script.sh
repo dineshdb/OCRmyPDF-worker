@@ -7,8 +7,8 @@ cd $SOURCE_DIR || exit 1
 
 echo "Watching $SOURCE_DIR for new PDF files..."
 
-# using find to search for directory and execute the bash commands
-find . -type f -iname '*.pdf' -exec bash -c '
+# using find to search for directory and execute the sh commands
+find . -type f -iname '*.pdf' -exec sh -c '
 	basename=$(basename "$0" .pdf)
 	target_file="$TARGET_DIR/$basename.pdf"
 	echo "Found $target_file"
