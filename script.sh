@@ -11,7 +11,7 @@ find . -type f -iname '*.pdf' -exec bash -c '
 	target_file="$TARGET_DIR/$basename.pdf"
 	if [ ! -f $target_file ]; then
 		echo "Processing $basename.pdf to $target_file"
-		pkgx ocrmypdf "$basename.pdf" "$target_file"
+		ocrmypdf "$basename.pdf" "$target_file"
 		echo "Processed $basename.pdf"
 	fi
 
