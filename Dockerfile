@@ -1,4 +1,6 @@
 FROM docker.io/jbarlow83/ocrmypdf-alpine
-COPY script.sh ./
+RUN pip install pdfplumber
+RUN mkdir -p /var/lib/source /var/lib/target
+COPY . .
 ENTRYPOINT [ "/bin/sh" ]
-CMD [ "./script.sh" ]
+CMD [ "./scripts/script.sh" ]
