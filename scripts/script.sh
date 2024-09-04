@@ -13,14 +13,14 @@ find "$SOURCE_DIR" -type f -iname '*.pdf' -exec sh -c '
 	target_txt="$TARGET_DIR/$basename.txt"
 	echo "Found $basename.pdf"
 	if [ ! -f $target_pdf ]; then
-		echo "OCR: Processing $basename.pdf"
+		echo "OCR: Processing $target_pdf"
 		ocrmypdf "$basename.pdf" "$target_pdf"
 	fi
 
 	## pdf2text
 	if [ "$ENABLE_PDF_TO_TEXT" = true ]; then
 		if [ ! -f $target_txt ]; then
-			echo "PDF2Text: Processing $basename.pdf"
+			echo "PDF2Text: Processing $target_pdf"
 			python scripts/pdf2text.py "$target_pdf" "$target_txt"
 		fi
 	fi
