@@ -9,12 +9,13 @@ echo "Watching $SOURCE_DIR -> $TARGET_DIR"
 # using find to search for directory and execute the sh commands
 find "$SOURCE_DIR" -type f -iname '*.pdf' -exec sh -c '
 	basename=$(basename "$0" .pdf)
+	source_pdf="$SOURCE_DIR/$basename.pdf"
 	target_pdf="$TARGET_DIR/$basename.pdf"
 	target_txt="$TARGET_DIR/$basename.txt"
 	echo "Found $basename.pdf"
 	if [ ! -f $target_pdf ]; then
-		echo "OCR: Processing $target_pdf"
-		ocrmypdf "$basename.pdf" "$target_pdf"
+		echo "OCR: Processing $source_pdf"
+		ocrmypdf "$source_pdf" "$target_pdf"
 	fi
 
 	## pdf2text
