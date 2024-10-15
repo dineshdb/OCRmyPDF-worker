@@ -13,6 +13,13 @@ find "$SOURCE_DIR" -type f -iname '*.pdf' -exec sh -c '
 	target_pdf="$TARGET_DIR/$basename.pdf"
 	target_txt="$TARGET_DIR/$basename.txt"
 	echo "Found $basename.pdf"
+
+	file_type=$(file -b --mime-type "$source_pdf")
+	if [ "$file_type" != "application/pdf" ]; then
+		echo "Skipping $source_pdf ($file_type, not a PDF)"
+		exit 1
+	fi
+
 	if [ ! -f $target_pdf ]; then
 		echo "OCR: Processing $source_pdf"
 		ocrmypdf --skip-text "$source_pdf" "$target_pdf"
