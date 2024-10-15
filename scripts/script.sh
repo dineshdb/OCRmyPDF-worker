@@ -15,7 +15,7 @@ find "$SOURCE_DIR" -type f -iname '*.pdf' -exec sh -c '
 	echo "Found $basename.pdf"
 	if [ ! -f $target_pdf ]; then
 		echo "OCR: Processing $source_pdf"
-		ocrmypdf "$source_pdf" "$target_pdf"
+		ocrmypdf --skip-text "$source_pdf" "$target_pdf"
 	fi
 
 	## pdf2text
