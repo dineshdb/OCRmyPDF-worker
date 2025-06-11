@@ -70,6 +70,7 @@ parser.add_argument("-s", "--source", dest="source_dir", default=os.environ.get(
 parser.add_argument("-t", "--target", dest="target_dir", default=os.environ.get("TARGET_DIR", os.getcwd()), help="Target directory (default: current directory or TARGET_DIR env var)")
 parser.add_argument("--pdfplumber", action="store_true", help="Use pdfplumber engine for text extraction")
 parser.add_argument("--pdfminer", action="store_true", help="Use pdfminer.six engine for text extraction")
+parser.add_argument("--ocr", action="store_true", help="Enable OCR processing (default: False)")
 
 args = parser.parse_args()
 
@@ -92,20 +93,25 @@ base_name = os.path.basename(args.input_file)
 ocr_file = os.path.join(args.target_dir, f"{base_name}.ocr.pdf")
 # Ensure target directory exists
 pathlib.Path(args.target_dir).mkdir(parents=True, exist_ok=True)
-# Run Tesseract OCR via ocrmypdf to generate OCRed PDF only if it doesn't already exist
+# Run Tesseract OCR via ocrmypdf to generate OCRed PDF only if it doesn't already exist and if OCR is enabled
 import subprocess
-if not os.path.exists(ocr_file):
-    ocr_command = ["ocrmypdf", "--skip-text", input_file_path, ocr_file]
-    subprocess.run(ocr_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    print(f"OCR processing completed for '{input_file_path}' to '{ocr_file}'.")
+file_to_process = input_file_path
+if args.ocr:
+    if not os.path.exists(ocr_file):
+        ocr_command = ["ocrmypdf", "--skip-text", input_file_path, ocr_file]
+        subprocess.run(ocr_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(f"OCR processing completed for '{input_file_path}' to '{ocr_file}'.")
+    else:
+        print(f"Skipping OCR: '{ocr_file}' already exists.")
+    file_to_process = ocr_file
 else:
-    print(f"Skipping OCR: '{ocr_file}' already exists. Skipping OCR processing.")
+    print("OCR processing disabled. Using original file for text extraction.")
 
-# Use the OCRed file for text extraction with selected engines, skipping if output already exists
+# Use the selected file for text extraction with selected engines, skipping if output already exists
 if args.pdfplumber:
     output_file = os.path.join(args.target_dir, f"{base_name}.pdfplumber.txt")
     if not os.path.exists(output_file):
-        text = get_full_text(ocr_file)
+        text = get_full_text(file_to_process)
         # Open the file in write mode
         with open(output_file, "w+", encoding="utf-8") as file:
             file.write(text)
@@ -116,7 +122,7 @@ if args.pdfplumber:
 if args.pdfminer:
     output_file = os.path.join(args.target_dir, f"{base_name}.pdfminer.txt")
     if not os.path.exists(output_file):
-        text = get_full_text_pdfminer(ocr_file)
+        text = get_full_text_pdfminer(file_to_process)
         # Open the file in write mode
         with open(output_file, "w+", encoding="utf-8") as file:
             file.write(text)
