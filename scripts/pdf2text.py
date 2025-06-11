@@ -82,7 +82,7 @@ def process_ocr(args: argparse.Namespace, input_file_path: str, base_name: str) 
     if args.ocr:
         ocr_file = os.path.join(args.target_dir, f"{base_name}.ocr.pdf")
         if not os.path.exists(ocr_file):
-            ocr_command = ["ocrmypdf", "--skip-text", input_file_path, ocr_file]
+            ocr_command = ["ocrmypdf", "--skip-text", "-l=eng+deu", input_file_path, ocr_file]
             subprocess.run(ocr_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             print(f"OCRed: '{input_file_path}' to '{ocr_file}'.")
         else:
