@@ -105,14 +105,19 @@ def process_ocr(args: argparse.Namespace, input_file_path: str, base_name: str) 
             ocr_command = [
                 "ocrmypdf",
                 "--skip-text",
+                "--rotate-pages",
                 "-l=eng+deu",
                 input_file_path,
                 ocr_file,
             ]
-            subprocess.run(
-                ocr_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            )
-            print(f"OCRed: '{input_file_path}' to '{ocr_file}'.")
+            try:
+                result = subprocess.run(
+                    ocr_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                )
+                print(f"OCRed: '{input_file_path}' to '{ocr_file}'.")
+            except subprocess.CalledProcessError as e:
+                print(f"Error during OCR processing: {e.stderr}")
+                exit(1)
         else:
             print(f"Skipping OCR: '{ocr_file}' already exists.")
         file_to_process = ocr_file
