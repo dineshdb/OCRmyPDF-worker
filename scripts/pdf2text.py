@@ -1,4 +1,13 @@
-#!/bin/env python3
+#!/usr/bin/env -S uv run
+# -*- coding: utf-8 -*-
+
+# /// script
+# requires-python = ">=3.13"
+# dependencies = [
+#   "pdfplumber",
+# ]
+# ///
+
 """
 This script is used to extract the full text from a PDF file.
 It uses the pdfplumber library to read the PDF file and extract the text from each page.
