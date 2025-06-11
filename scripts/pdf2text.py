@@ -101,11 +101,15 @@ def process_ocr(args: argparse.Namespace, input_file_path: str, base_name: str) 
     file_to_process = input_file_path
     if args.ocr:
         ocr_file = os.path.join(args.target_dir, f"{base_name}.ocr.pdf")
+        txt_file = os.path.join(args.target_dir, f"{base_name}.ocr.txt")
         if not os.path.exists(ocr_file):
             ocr_command = [
                 "ocrmypdf",
                 "--skip-text",
                 "--rotate-pages",
+                "--clean",
+                "--sidecar",
+                txt_file,
                 "-l=eng+deu",
                 input_file_path,
                 ocr_file,
