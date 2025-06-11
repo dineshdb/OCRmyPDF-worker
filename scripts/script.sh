@@ -29,7 +29,7 @@ find "$SOURCE_DIR" -type f -iname '*.pdf' -exec sh -c '
 	if [ "$ENABLE_PDF_TO_TEXT" = true ]; then
 		if [ ! -f $target_txt ]; then
 			echo "PDF2Text: Processing $target_pdf"
-			python scripts/pdf2text.py "$target_pdf" "$target_txt"
+			python scripts/pdf2text.py pdfplumber "$target_pdf" "$target_txt"
 		fi
 	fi
 ' {} \;

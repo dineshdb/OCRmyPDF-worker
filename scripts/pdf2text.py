@@ -33,13 +33,21 @@ def get_full_text(file: str) -> str:
     return full_text
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument("input_file")
-parser.add_argument("output_file")
+parser = argparse.ArgumentParser(description="Extract text from PDF files using different methods.")
+subparsers = parser.add_subparsers(dest="command", help="Subcommand to execute")
+
+# Subcommand for pdfplumber
+pdfplumber_parser = subparsers.add_parser("pdfplumber", help="Extract text using pdfplumber")
+pdfplumber_parser.add_argument("input_file", help="Input PDF file")
+pdfplumber_parser.add_argument("output_file", help="Output text file")
+
 args = parser.parse_args()
 
-text = get_full_text(args.input_file)
-
-# Open the file in write mode
-with open(args.output_file, "w+", encoding="utf-8") as file:
-    file.write(text)
+if args.command == "pdfplumber":
+    text = get_full_text(args.input_file)
+    # Open the file in write mode
+    with open(args.output_file, "w+", encoding="utf-8") as file:
+        file.write(text)
+else:
+    parser.print_help()
+    exit(1)
