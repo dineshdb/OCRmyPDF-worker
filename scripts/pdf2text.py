@@ -16,6 +16,7 @@ import pathlib
 import subprocess
 from pdfminer.high_level import extract_text as extract_text_pdfminer
 
+
 def get_full_text(file: str) -> str:
     full_text = ""
     with pdfplumber.open(file) as pdf:
@@ -23,17 +24,18 @@ def get_full_text(file: str) -> str:
             full_text += page.extract_text()
     return full_text
 
+
 def is_pdf_file(file_path: str) -> bool:
     try:
         file_type_check = subprocess.run(
-            ["file", "-b", "--mime-type", file_path], 
-            check=True, 
-            capture_output=True, 
-            text=True
+            ["file", "-b", "--mime-type", file_path],
+            check=True,
+            capture_output=True,
+            text=True,
         )
         file_type = file_type_check.stdout.strip()
         if file_type != "application/pdf":
-            print(f"Error: Input file '{file_path}' is not a PDF (detected type: {file_type}).")
+            print(f"Error: Input file '{file_path}' is not a PDF but {file_type}.")
             return False
         return True
     except subprocess.CalledProcessError:
@@ -42,32 +44,49 @@ def is_pdf_file(file_path: str) -> bool:
 
 
 def parse_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Extract text from PDF files using different methods.")
+    parser = argparse.ArgumentParser(
+        description="Extract text from PDF files using different methods."
+    )
     parser.add_argument("input_file", help="Input PDF file")
     parser.add_argument(
-        "-s", "--source", 
-        dest="source_dir", 
-        default=os.environ.get("SOURCE_DIR", os.getcwd()), 
-        help="Source directory (default: current directory or SOURCE_DIR env var)"
+        "-s",
+        "--source",
+        dest="source_dir",
+        default=os.environ.get("SOURCE_DIR", os.getcwd()),
+        help="Source directory (default: current directory or SOURCE_DIR env var)",
     )
     parser.add_argument(
-        "-t", "--target", 
-        dest="target_dir", 
-        default=os.environ.get("TARGET_DIR", os.getcwd()), 
-        help="Target directory (default: current directory or TARGET_DIR env var)"
+        "-t",
+        "--target",
+        dest="target_dir",
+        default=os.environ.get("TARGET_DIR", os.getcwd()),
+        help="Target directory (default: current directory or TARGET_DIR env var)",
     )
-    parser.add_argument("--pdfplumber", action="store_true", help="Use pdfplumber engine for text extraction")
-    parser.add_argument("--pdfminer", action="store_true", help="Use pdfminer.six engine for text extraction")
-    parser.add_argument("--ocr", action="store_true", help="Enable OCR processing (default: False)")
-    
+    parser.add_argument(
+        "--pdfplumber",
+        action="store_true",
+        help="Use pdfplumber engine for text extraction",
+    )
+    parser.add_argument(
+        "--pdfminer",
+        action="store_true",
+        help="Use pdfminer.six engine for text extraction",
+    )
+    parser.add_argument(
+        "--ocr", action="store_true", help="Enable OCR processing (default: False)"
+    )
+
     args = parser.parse_args()
-    
+
     if not args.pdfplumber and not args.pdfminer:
-        print("Error: At least one engine (--pdfplumber or --pdfminer) must be selected.")
+        print(
+            "Error: At least one engine (--pdfplumber or --pdfminer) must be selected."
+        )
         parser.print_help()
         exit(1)
-    
+
     return args
+
 
 def validate_input_file(input_file_path: str) -> None:
     if not os.path.exists(input_file_path):
@@ -77,20 +96,29 @@ def validate_input_file(input_file_path: str) -> None:
         print(f"Error: The input file '{input_file_path}' is not a valid PDF file.")
         exit(1)
 
+
 def process_ocr(args: argparse.Namespace, input_file_path: str, base_name: str) -> str:
     file_to_process = input_file_path
     if args.ocr:
         ocr_file = os.path.join(args.target_dir, f"{base_name}.ocr.pdf")
         if not os.path.exists(ocr_file):
-            ocr_command = ["ocrmypdf", "--skip-text", "-l=eng+deu", input_file_path, ocr_file]
-            subprocess.run(ocr_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ocr_command = [
+                "ocrmypdf",
+                "--skip-text",
+                "-l=eng+deu",
+                input_file_path,
+                ocr_file,
+            ]
+            subprocess.run(
+                ocr_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
             print(f"OCRed: '{input_file_path}' to '{ocr_file}'.")
         else:
             print(f"Skipping OCR: '{ocr_file}' already exists.")
         file_to_process = ocr_file
     else:
         print("OCR: disabled. Using original file for text extraction.")
-    
+
     return file_to_process
 
 
@@ -102,7 +130,11 @@ extract_text_with_engine - Extract text using the specified engine if output doe
 :param output_file: Path to the output file.
 :return: None
 """
-def extract_text_with_engine(engine_name: str, engine_func, file_to_process: str, output_file: str) -> None:
+
+
+def extract_text_with_engine(
+    engine_name: str, engine_func, file_to_process: str, output_file: str
+) -> None:
     if not os.path.exists(output_file):
         text = engine_func(file_to_process)
         with open(output_file, "w+", encoding="utf-8") as file:
@@ -114,23 +146,31 @@ def extract_text_with_engine(engine_name: str, engine_func, file_to_process: str
 
 def main() -> None:
     args = parse_arguments()
-    
-    input_file_path = os.path.join(args.source_dir, args.input_file) if not os.path.isabs(args.input_file) else args.input_file
+
+    input_file_path = (
+        os.path.join(args.source_dir, args.input_file)
+        if not os.path.isabs(args.input_file)
+        else args.input_file
+    )
     validate_input_file(input_file_path)
-    
+
     base_name = os.path.basename(args.input_file)
     # Ensure target directory exists
     pathlib.Path(args.target_dir).mkdir(parents=True, exist_ok=True)
     file_to_process = process_ocr(args, input_file_path, base_name)
-    
+
     # Extract text using selected engines
     if args.pdfplumber:
         output_file = os.path.join(args.target_dir, f"{base_name}.pdfplumber.txt")
-        extract_text_with_engine("pdfplumber", get_full_text, file_to_process, output_file)
-    
+        extract_text_with_engine(
+            "pdfplumber", get_full_text, file_to_process, output_file
+        )
+
     if args.pdfminer:
         output_file = os.path.join(args.target_dir, f"{base_name}.pdfminer.txt")
-        extract_text_with_engine("pdfminer", extract_text_pdfminer, file_to_process, output_file)
+        extract_text_with_engine(
+            "pdfminer", extract_text_pdfminer, file_to_process, output_file
+        )
 
 
 if __name__ == "__main__":
