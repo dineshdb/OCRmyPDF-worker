@@ -107,6 +107,7 @@ def process_ocr(args: argparse.Namespace, input_file_path: str, base_name: str) 
                 "ocrmypdf",
                 "--skip-text",
                 "--rotate-pages",
+                "--deskew",
                 "--clean",
                 "--sidecar",
                 txt_file,
