@@ -1,5 +1,5 @@
 FROM docker.io/jbarlow83/ocrmypdf-alpine
-RUN pip install pdfplumber; apk add file
+RUN pip install pdfplumber pdfminer.six; apk add file
 RUN mkdir -p /var/lib/source /var/lib/target
 COPY . .
 ENTRYPOINT [ "/bin/sh" ]

@@ -5,6 +5,7 @@
 # requires-python = ">=3.13"
 # dependencies = [
 #   "pdfplumber",
+#   "pdfminer.six",
 # ]
 # ///
 
@@ -33,6 +34,17 @@ def get_full_text(file: str) -> str:
     return full_text
 
 
+"""
+get_full_text_pdfminer - Get full text from a pdf file using pdfminer.six.
+:param file: The path to the PDF file.
+:return: The full text extracted from the PDF file.
+:rtype: str
+"""
+def get_full_text_pdfminer(file: str) -> str:
+    from pdfminer.high_level import extract_text
+    return extract_text(file)
+
+
 parser = argparse.ArgumentParser(description="Extract text from PDF files using different methods.")
 subparsers = parser.add_subparsers(dest="command", help="Subcommand to execute")
 
@@ -41,10 +53,20 @@ pdfplumber_parser = subparsers.add_parser("pdfplumber", help="Extract text using
 pdfplumber_parser.add_argument("input_file", help="Input PDF file")
 pdfplumber_parser.add_argument("output_file", help="Output text file")
 
+# Subcommand for pdfminer.six
+pdfminer_parser = subparsers.add_parser("pdfminer", help="Extract text using pdfminer.six")
+pdfminer_parser.add_argument("input_file", help="Input PDF file")
+pdfminer_parser.add_argument("output_file", help="Output text file")
+
 args = parser.parse_args()
 
 if args.command == "pdfplumber":
     text = get_full_text(args.input_file)
+    # Open the file in write mode
+    with open(args.output_file, "w+", encoding="utf-8") as file:
+        file.write(text)
+elif args.command == "pdfminer":
+    text = get_full_text_pdfminer(args.input_file)
     # Open the file in write mode
     with open(args.output_file, "w+", encoding="utf-8") as file:
         file.write(text)
