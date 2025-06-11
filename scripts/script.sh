@@ -1,5 +1,29 @@
 #!/bin/sh
 
+# Parse command line options
+OPTIONS=$(getopt -o s:t:h -l source:,target:,help -- "$@")
+if [ $? -ne 0 ]; then
+  echo "Error: Invalid option or missing argument" >&2
+  echo "Usage: $0 [-s|--source source_dir] [-t|--target target_dir] [-h|--help]" >&2
+  exit 1
+fi
+
+eval set -- "$OPTIONS"
+while true; do
+  case "$1" in
+    -s|--source) SOURCE_DIR="$2"; shift 2 ;;
+    -t|--target) TARGET_DIR="$2"; shift 2 ;;
+    -h|--help) echo "Usage: $0 [-s|--source source_dir] [-t|--target target_dir] [-h|--help]" >&2
+               echo "  -s, --source: Set source directory (default: /var/lib/source or SOURCE_DIR env var)" >&2
+               echo "  -t, --target: Set target directory (default: /var/lib/target or TARGET_DIR env var)" >&2
+               echo "  -h, --help: Show this help message" >&2
+               exit 0 ;;
+    --) shift; break ;;
+    *) echo "Invalid option: $1" >&2; exit 1 ;;
+  esac
+done
+
+# Fallback to environment variables or default values if not set via command line
 SOURCE_DIR="${SOURCE_DIR:-/var/lib/source}"
 TARGET_DIR="${TARGET_DIR:-/var/lib/target}"
 ENABLE_PDF_TO_TEXT="${ENABLE_PDF_TO_TEXT:-false}"
