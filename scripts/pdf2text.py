@@ -44,6 +44,25 @@ def get_full_text_pdfminer(file: str) -> str:
     from pdfminer.high_level import extract_text
     return extract_text(file)
 
+"""
+is_pdf_file - Check if the given file is a PDF.
+:param file_path: The path to the file to check.
+:return: True if the file is a PDF, False otherwise.
+:rtype: bool
+"""
+def is_pdf_file(file_path: str) -> bool:
+    import subprocess
+    try:
+        file_type_check = subprocess.run(["file", "-b", "--mime-type", file_path], check=True, capture_output=True, text=True)
+        file_type = file_type_check.stdout.strip()
+        if file_type != "application/pdf":
+            print(f"Error: Input file '{file_path}' is not a PDF (detected type: {file_type}).")
+            return False
+        return True
+    except subprocess.CalledProcessError:
+        print(f"Error: Unable to determine file type of '{file_path}'.")
+        return False
+
 
 parser = argparse.ArgumentParser(description="Extract text from PDF files using different methods.")
 parser.add_argument("input_file", help="Input PDF file")
@@ -60,26 +79,47 @@ if not args.pdfplumber and not args.pdfminer:
     exit(1)
 
 input_file_path = os.path.join(args.source_dir, args.input_file) if not os.path.isabs(args.input_file) else args.input_file
+# Check if the input file exists
+if not os.path.exists(input_file_path):
+    print(f"Error: Input file '{input_file_path}' does not exist.")
+    exit(1)
+# Check if the input file is a PDF
+if not is_pdf_file(input_file_path):
+    print(f"Error: The input file '{input_file_path}' is not a valid PDF file.")
+    exit(1)
+
 base_name = os.path.basename(args.input_file)
 ocr_file = os.path.join(args.target_dir, f"{base_name}.ocr.pdf")
 # Ensure target directory exists
 pathlib.Path(args.target_dir).mkdir(parents=True, exist_ok=True)
-# Run Tesseract OCR via ocrmypdf to generate OCRed PDF
+# Run Tesseract OCR via ocrmypdf to generate OCRed PDF only if it doesn't already exist
 import subprocess
-ocr_command = ["ocrmypdf", "--skip-text", input_file_path, ocr_file]
-subprocess.run(ocr_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+if not os.path.exists(ocr_file):
+    ocr_command = ["ocrmypdf", "--skip-text", input_file_path, ocr_file]
+    subprocess.run(ocr_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print(f"OCR processing completed for '{input_file_path}' to '{ocr_file}'.")
+else:
+    print(f"Skipping OCR: '{ocr_file}' already exists. Skipping OCR processing.")
 
-# Use the OCRed file for text extraction with selected engines
+# Use the OCRed file for text extraction with selected engines, skipping if output already exists
 if args.pdfplumber:
-    text = get_full_text(ocr_file)
     output_file = os.path.join(args.target_dir, f"{base_name}.pdfplumber.txt")
-    # Open the file in write mode
-    with open(output_file, "w+", encoding="utf-8") as file:
-        file.write(text)
+    if not os.path.exists(output_file):
+        text = get_full_text(ocr_file)
+        # Open the file in write mode
+        with open(output_file, "w+", encoding="utf-8") as file:
+            file.write(text)
+        print(f"Text extraction completed using pdfplumber to '{output_file}'.")
+    else:
+        print(f"Skipping pdfplumber: '{output_file}' already exists")
 
 if args.pdfminer:
-    text = get_full_text_pdfminer(ocr_file)
     output_file = os.path.join(args.target_dir, f"{base_name}.pdfminer.txt")
-    # Open the file in write mode
-    with open(output_file, "w+", encoding="utf-8") as file:
-        file.write(text)
+    if not os.path.exists(output_file):
+        text = get_full_text_pdfminer(ocr_file)
+        # Open the file in write mode
+        with open(output_file, "w+", encoding="utf-8") as file:
+            file.write(text)
+        print(f"Text extraction completed using pdfminer to '{output_file}'.")
+    else:
+        print(f"Skipping pdfminer: '{output_file}' already exists")
