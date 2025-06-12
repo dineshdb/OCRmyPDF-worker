@@ -111,8 +111,8 @@ def process_ocr(args: argparse.Namespace, input_file_path: str, base_name: str) 
             if source_mtime > ocr_mtime:
                 regenerate = True
             else:
-                print(f"Skipping OCR: '{ocr_file}' already exists and is up to date.")
-        
+                print(f"Skipping OCR: '{ocr_file}' is up to date.")
+
         if regenerate:
             ocr_command = [
                 "ocrmypdf",
@@ -128,7 +128,11 @@ def process_ocr(args: argparse.Namespace, input_file_path: str, base_name: str) 
             ]
             try:
                 result = subprocess.run(
-                    ocr_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                    ocr_command,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
                 )
                 print(f"OCRed: '{input_file_path}' to '{ocr_file}'.")
             except subprocess.CalledProcessError as e:
@@ -163,8 +167,8 @@ def extract_text_with_engine(
         if source_mtime > output_mtime:
             regenerate = True
         else:
-            print(f"Skipping {engine_name}: '{output_file}' already exists and is up to date.")
-    
+            print(f"Skipping {engine_name}: '{output_file}' is up to date.")
+
     if regenerate:
         text = engine_func(file_to_process)
         with open(output_file, "w+", encoding="utf-8") as file:
