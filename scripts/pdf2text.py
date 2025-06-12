@@ -85,8 +85,9 @@ def validate_input_file(input_file_path: str) -> None:
 def process_ocr(args: argparse.Namespace, input_file_path: str, base_name: str) -> str:
     file_to_process = input_file_path
     if args.ocr:
-        ocr_file = os.path.join(args.target_dir, f"{base_name}.tesseract.pdf")
-        txt_file = os.path.join(args.target_dir, f"{base_name}.tesseract.txt")
+        base_file_name = base_name.split('.pdf')[0] if '.pdf' in base_name else base_name
+        ocr_file = os.path.join(args.target_dir, f"{base_file_name}.tesseract.pdf")
+        txt_file = os.path.join(args.target_dir, f"{base_file_name}.tesseract.txt")
         regenerate = False
         if not os.path.exists(ocr_file):
             regenerate = True
@@ -172,13 +173,14 @@ def main() -> None:
     validate_input_file(input_file_path)
 
     base_name = os.path.basename(args.input_file)
+    base_file_name = base_name.split('.pdf')[0] if '.pdf' in base_name else base_name
     # Ensure target directory exists
     pathlib.Path(args.target_dir).mkdir(parents=True, exist_ok=True)
     file_to_process = process_ocr(args, input_file_path, base_name)
 
     # Extract text using selected engine
     if args.pdfminer:
-        output_file = os.path.join(args.target_dir, f"{base_name}.pdfminer.txt")
+        output_file = os.path.join(args.target_dir, f"{base_file_name}.pdfminer.txt")
         extract_text_with_engine(
             "pdfminer", extract_text_pdfminer, file_to_process, output_file
         )
