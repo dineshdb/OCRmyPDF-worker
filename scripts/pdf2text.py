@@ -109,7 +109,6 @@ def process_ocr(args: argparse.Namespace, input_file_path: str, base_name: str) 
             source_mtime = os.path.getmtime(input_file_path)
             ocr_mtime = os.path.getmtime(ocr_file)
             if source_mtime > ocr_mtime:
-                print(f"Source file '{input_file_path}' is newer than OCRed file '{ocr_file}'. Regenerating.")
                 regenerate = True
             else:
                 print(f"Skipping OCR: '{ocr_file}' already exists and is up to date.")
@@ -155,13 +154,22 @@ extract_text_with_engine - Extract text using the specified engine if output doe
 def extract_text_with_engine(
     engine_name: str, engine_func, file_to_process: str, output_file: str
 ) -> None:
+    regenerate = False
     if not os.path.exists(output_file):
+        regenerate = True
+    else:
+        source_mtime = os.path.getmtime(file_to_process)
+        output_mtime = os.path.getmtime(output_file)
+        if source_mtime > output_mtime:
+            regenerate = True
+        else:
+            print(f"Skipping {engine_name}: '{output_file}' already exists and is up to date.")
+    
+    if regenerate:
         text = engine_func(file_to_process)
         with open(output_file, "w+", encoding="utf-8") as file:
             file.write(text)
         print(f"Text extraction completed using {engine_name} to '{output_file}'.")
-    else:
-        print(f"Skipping {engine_name}: '{output_file}' already exists")
 
 
 def main() -> None:
