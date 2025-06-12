@@ -102,7 +102,19 @@ def process_ocr(args: argparse.Namespace, input_file_path: str, base_name: str) 
     if args.ocr:
         ocr_file = os.path.join(args.target_dir, f"{base_name}.tesseract.pdf")
         txt_file = os.path.join(args.target_dir, f"{base_name}.tesseract.txt")
+        regenerate = False
         if not os.path.exists(ocr_file):
+            regenerate = True
+        else:
+            source_mtime = os.path.getmtime(input_file_path)
+            ocr_mtime = os.path.getmtime(ocr_file)
+            if source_mtime > ocr_mtime:
+                print(f"Source file '{input_file_path}' is newer than OCRed file '{ocr_file}'. Regenerating.")
+                regenerate = True
+            else:
+                print(f"Skipping OCR: '{ocr_file}' already exists and is up to date.")
+        
+        if regenerate:
             ocr_command = [
                 "ocrmypdf",
                 "--skip-text",
@@ -123,8 +135,6 @@ def process_ocr(args: argparse.Namespace, input_file_path: str, base_name: str) 
             except subprocess.CalledProcessError as e:
                 print(f"Error during OCR processing: {e.stderr}")
                 exit(1)
-        else:
-            print(f"Skipping OCR: '{ocr_file}' already exists.")
         file_to_process = ocr_file
     else:
         print("OCR: disabled. Using original file for text extraction.")
