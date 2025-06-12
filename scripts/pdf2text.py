@@ -100,8 +100,8 @@ def validate_input_file(input_file_path: str) -> None:
 def process_ocr(args: argparse.Namespace, input_file_path: str, base_name: str) -> str:
     file_to_process = input_file_path
     if args.ocr:
-        ocr_file = os.path.join(args.target_dir, f"{base_name}.ocr.pdf")
-        txt_file = os.path.join(args.target_dir, f"{base_name}.ocr.txt")
+        ocr_file = os.path.join(args.target_dir, f"{base_name}.tesseract.pdf")
+        txt_file = os.path.join(args.target_dir, f"{base_name}.tesseract.txt")
         if not os.path.exists(ocr_file):
             ocr_command = [
                 "ocrmypdf",
