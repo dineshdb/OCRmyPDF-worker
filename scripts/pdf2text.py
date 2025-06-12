@@ -4,25 +4,15 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#   "pdfplumber",
 #   "pdfminer.six",
 # ]
 # ///
 
-import pdfplumber
 import argparse
 import os
 import pathlib
 import subprocess
 from pdfminer.high_level import extract_text as extract_text_pdfminer
-
-
-def get_full_text(file: str) -> str:
-    full_text = ""
-    with pdfplumber.open(file) as pdf:
-        for page in pdf.pages:
-            full_text += page.extract_text()
-    return full_text
 
 
 def is_pdf_file(file_path: str) -> bool:
@@ -63,11 +53,6 @@ def parse_arguments() -> argparse.Namespace:
         help="Target directory (default: current directory or TARGET_DIR env var)",
     )
     parser.add_argument(
-        "--pdfplumber",
-        action="store_true",
-        help="Use pdfplumber engine for text extraction",
-    )
-    parser.add_argument(
         "--pdfminer",
         action="store_true",
         help="Use pdfminer.six engine for text extraction",
@@ -78,9 +63,9 @@ def parse_arguments() -> argparse.Namespace:
 
     args = parser.parse_args()
 
-    if not args.pdfplumber and not args.pdfminer:
+    if not args.pdfminer:
         print(
-            "Error: At least one engine (--pdfplumber or --pdfminer) must be selected."
+            "Error: The engine (--pdfminer) must be selected."
         )
         parser.print_help()
         exit(1)
@@ -191,13 +176,7 @@ def main() -> None:
     pathlib.Path(args.target_dir).mkdir(parents=True, exist_ok=True)
     file_to_process = process_ocr(args, input_file_path, base_name)
 
-    # Extract text using selected engines
-    if args.pdfplumber:
-        output_file = os.path.join(args.target_dir, f"{base_name}.pdfplumber.txt")
-        extract_text_with_engine(
-            "pdfplumber", get_full_text, file_to_process, output_file
-        )
-
+    # Extract text using selected engine
     if args.pdfminer:
         output_file = os.path.join(args.target_dir, f"{base_name}.pdfminer.txt")
         extract_text_with_engine(
