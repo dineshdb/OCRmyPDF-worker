@@ -13,6 +13,7 @@ find "$SOURCE_DIR" -type f -iname '*.pdf' -exec sh -c '
 
 	echo "PDF2Text: Processing $source_pdf"
 	python scripts/pdf2text.py \
+		--ocr	\
 		--pdfminer \
 		-s "$SOURCE_DIR" \
 		-t "$TARGET_DIR" \
